@@ -1,22 +1,11 @@
 "use client";
 
 import { useState } from "react";
-
-interface SlideRecord {
-  slideId: string;
-  slideNumber: number;
-  slideLocation: string;
-}
-
-interface FileRecord {
-  fileId: string;
-  fileName: string;
-  fileLocation: string;
-  fileCreatedTime: string;
-  fileSlides: SlideRecord[];
-}
+import { useRouter } from "next/navigation";
+import { FileRecord } from "@/types";
 
 export default function UploadPage() {
+  const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
@@ -41,12 +30,13 @@ export default function UploadPage() {
       });
 
       const data = await response.json();
-      console.log("API Response:", data); // Add this line to debug
 
       if (response.ok) {
         setMessage(data.message);
         setFileRecord(data.fileRecord);
         setFile(null);
+        // Navigate to the presentation page with the fileRecord data
+        router.push(`/present/${data.fileRecord.fileId}`);
       } else {
         setMessage(data.message || data.error || "Failed to upload file.");
       }
@@ -58,8 +48,6 @@ export default function UploadPage() {
     } finally {
       setUploading(false);
     }
-
-    console.log(fileRecord);
   };
 
   return (
@@ -88,25 +76,6 @@ export default function UploadPage() {
         >
           {message}
         </p>
-      )}
-      {fileRecord && (
-        <div className="mt-4 p-4 rounded-md">
-          <h2 className="text-lg font-semibold">Uploaded File Details:</h2>
-          <p>File ID: {fileRecord.fileId}</p>
-          <p>Filename: {fileRecord.fileName}</p>
-          <p>File Location: {fileRecord.fileLocation}</p>
-          <p>
-            Created Time:{" "}
-            {new Date(fileRecord.fileCreatedTime).toLocaleString()}
-          </p>
-          <h3 className="text-md font-semibold mt-4">Slides:</h3>
-          {fileRecord.fileSlides.map((slide) => (
-            <p key={slide.slideId}>
-              Slide ID: {slide.slideId}, Slide Number: {slide.slideNumber},
-              Slide Location: {slide.slideLocation}
-            </p>
-          ))}
-        </div>
       )}
     </div>
   );
