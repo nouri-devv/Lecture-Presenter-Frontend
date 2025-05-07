@@ -35,7 +35,9 @@ export default function UploadPage() {
         setMessage(data.message);
         setFileRecord(data.fileRecord);
         setFile(null);
-        // Navigate to the presentation page with the fileRecord data
+
+        // Store the fileRecord in localStorage and navigate
+        localStorage.setItem("fileRecord", JSON.stringify(data.fileRecord));
         router.push(`/present/${data.fileRecord.fileId}`);
       } else {
         setMessage(data.message || data.error || "Failed to upload file.");

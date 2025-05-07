@@ -3,11 +3,10 @@ export interface FileRecord {
   fileName: string;
   fileLocation: string;
   fileCreatedTime: string;
-  fileSlides: SlideRecord[];
-}
-
-export interface SlideRecord {
+  totalSlides: number;
+  fileSlides: {
     slideId: string;
     slideNumber: number;
     slideLocation: string;
+  }[];
 }
