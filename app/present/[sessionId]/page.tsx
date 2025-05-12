@@ -23,19 +23,34 @@ export async function fetchSlide(
   return await response.blob();
 }
 
+export async function fetchAudio(
+  sessionId: string,
+  audioNumber: number
+): Promise<Blob | null> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/audios/${sessionId}/audio/${audioNumber}`
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to load audio: ${response.statusText}`);
+  }
+  return await response.blob();
+}
+
 export default function PresentationPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [currentSlide, setCurrentSlide] = useState(1);
+  const [currentAudio, setCurrentAudio] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [slideUrl, setSlideUrl] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   const loadSlide = async (sessionId: string, slideNumber: number) => {
     try {
-      const blob = await fetchSlide(sessionId, slideNumber);
-      if (!blob) throw new Error("No data returned");
+      const slideBlob = await fetchSlide(sessionId, slideNumber);
+      if (!slideBlob) throw new Error("No data returned");
 
-      const url = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(slideBlob);
       setSlideUrl(url);
       setError(null);
     } catch (err) {
@@ -44,14 +59,30 @@ export default function PresentationPage() {
     }
   };
 
+  const handleAudio = async (sessionId: string, audioNumber: number) => {
+    try {
+      const audioBlob = await fetchAudio(sessionId, audioNumber);
+      if (!audioBlob) throw new Error("No data returned");
+
+      const url = URL.createObjectURL(audioBlob);
+      setAudioUrl(url);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load audio");
+      setAudioUrl(null);
+    }
+  };
+
   const handleNext = useCallback(() => {
     if (session) {
       setCurrentSlide((prev) => Math.min(session.totalSlides, prev + 1));
+      setCurrentAudio((prev) => Math.min(session.totalSlides, prev + 1));
     }
   }, [session]);
 
   const handlePrevious = useCallback(() => {
     setCurrentSlide((prev) => Math.max(1, prev - 1));
+    setCurrentAudio((prev) => Math.max(1, prev - 1));
   }, []);
 
   useEffect(() => {
@@ -66,6 +97,7 @@ export default function PresentationPage() {
   useEffect(() => {
     if (session) {
       loadSlide(session.sessionId, currentSlide);
+      handleAudio(session.sessionId, currentSlide);
     }
   }, [session, currentSlide]);
 
@@ -76,6 +108,14 @@ export default function PresentationPage() {
       }
     };
   }, [slideUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [audioUrl]);
 
   if (loading) {
     return (
@@ -107,9 +147,11 @@ export default function PresentationPage() {
         {session && (
           <Control
             currentSlide={currentSlide}
+            currentAudio={currentAudio}
             totalSlides={session.totalSlides}
             onPrev={handlePrevious}
             onNext={handleNext}
+            audioUrl={audioUrl}
           />
         )}
       </div>
