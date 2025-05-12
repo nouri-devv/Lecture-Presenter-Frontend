@@ -1,43 +1,38 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileRecord } from "@/types";
+import { Session } from "@/types";
 import { useCallback } from "react";
 import { Control } from "@/components/present/Control";
 import { Presenter } from "@/components/present/Presenter";
 
-const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:5057";
+const API_BASE_URL = "https://localhost:7017";
 
-export async function fetchSlideData(
-  fileId: string,
+export async function fetchSlide(
+  sessionId: string,
   slideNumber: number
 ): Promise<Blob | null> {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/file-record/${fileId}/slides/${slideNumber}`
-    );
+  const response = await fetch(
+    `${API_BASE_URL}/api/slides/${sessionId}/slide/${slideNumber}`
+  );
 
-    if (!response.ok) {
-      throw new Error(`Failed to load slide: ${response.statusText}`);
-    }
-
-    return await response.blob();
-  } catch (err) {
-    console.error("Error fetching slide:", err);
-    return null;
+  if (!response.ok) {
+    throw new Error(`Failed to load slide: ${response.statusText}`);
   }
+
+  return await response.blob();
 }
 
 export default function PresentationPage() {
-  const [fileRecord, setFileRecord] = useState<FileRecord | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [currentSlide, setCurrentSlide] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [slideUrl, setSlideUrl] = useState<string | null>(null);
 
-  const loadSlide = async (fileId: string, slideNumber: number) => {
+  const loadSlide = async (sessionId: string, slideNumber: number) => {
     try {
-      const blob = await fetchSlideData(fileId, slideNumber);
+      const blob = await fetchSlide(sessionId, slideNumber);
       if (!blob) throw new Error("No data returned");
 
       const url = URL.createObjectURL(blob);
@@ -50,29 +45,29 @@ export default function PresentationPage() {
   };
 
   const handleNext = useCallback(() => {
-    if (fileRecord) {
-      setCurrentSlide((prev) => Math.min(fileRecord.totalSlides, prev + 1));
+    if (session) {
+      setCurrentSlide((prev) => Math.min(session.totalSlides, prev + 1));
     }
-  }, [fileRecord]);
+  }, [session]);
 
   const handlePrevious = useCallback(() => {
     setCurrentSlide((prev) => Math.max(1, prev - 1));
   }, []);
 
   useEffect(() => {
-    const storedRecord = localStorage.getItem("fileRecord");
+    const storedRecord = localStorage.getItem("session");
     if (storedRecord) {
-      const parsedRecord: FileRecord = JSON.parse(storedRecord);
-      setFileRecord(parsedRecord);
+      const parsedRecord: Session = JSON.parse(storedRecord);
+      setSession(parsedRecord);
     }
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    if (fileRecord) {
-      loadSlide(fileRecord.fileId, currentSlide);
+    if (session) {
+      loadSlide(session.sessionId, currentSlide);
     }
-  }, [fileRecord, currentSlide]);
+  }, [session, currentSlide]);
 
   useEffect(() => {
     return () => {
@@ -90,7 +85,7 @@ export default function PresentationPage() {
     );
   }
 
-  if (!fileRecord) {
+  if (!session) {
     return (
       <div className="flex h-screen items-center justify-center">
         No presentation data found
@@ -109,10 +104,10 @@ export default function PresentationPage() {
         {slideUrl && <Presenter slideUrl={slideUrl} />}
       </div>
       <div className="flex items-center justify-center bg-black/80 p-10">
-        {fileRecord && (
+        {session && (
           <Control
             currentSlide={currentSlide}
-            totalSlides={fileRecord.totalSlides}
+            totalSlides={session.totalSlides}
             onPrev={handlePrevious}
             onNext={handleNext}
           />

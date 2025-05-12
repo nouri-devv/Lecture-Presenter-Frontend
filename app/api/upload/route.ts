@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5057';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 const apiUrl = `${BACKEND_URL}/api/file-record`;
 
 export async function POST(request: Request) {

@@ -1,12 +1,15 @@
-export interface FileRecord {
-  fileId: string;
-  fileName: string;
-  fileLocation: string;
-  fileCreatedTime: string;
+export interface Session {
+  sessionId: string;
   totalSlides: number;
-  fileSlides: {
-    slideId: string;
+  slides: {
+    sessionId: string;
     slideNumber: number;
     slideLocation: string;
+  }[];
+  llmResponses: {
+    sessionId: string;
+    llmResponseNumber: number;
+    llmResponseHeading: string;
+    llmResponseExplanation: string;
   }[];
 }

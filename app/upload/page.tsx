@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileRecord } from "@/types";
+import { Session } from "@/types";
+
+const API_BASE_URL = "https://localhost:7017";
 
 export default function UploadPage() {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
-  const [fileRecord, setFileRecord] = useState<FileRecord>();
+  const [session, setSession] = useState<Session>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +25,7 @@ export default function UploadPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("/api/upload", {
+      const response = await fetch(`${API_BASE_URL}/api/new-session`, {
         method: "POST",
         credentials: "include",
         body: formData,
@@ -31,14 +33,16 @@ export default function UploadPage() {
 
       const data = await response.json();
 
+      console.log("Response data:", data);
+
       if (response.ok) {
         setMessage(data.message);
-        setFileRecord(data.fileRecord);
+        setSession(data);
         setFile(null);
 
         // Store the fileRecord in localStorage and navigate
-        localStorage.setItem("fileRecord", JSON.stringify(data.fileRecord));
-        router.push(`/present/${data.fileRecord.fileId}`);
+        localStorage.setItem("session", JSON.stringify(data));
+        router.push(`/present/${data.sessionId}`);
       } else {
         setMessage(data.message || data.error || "Failed to upload file.");
       }
@@ -73,7 +77,7 @@ export default function UploadPage() {
       {message && (
         <p
           className={`mt-4 p-2 text-center rounded-md ${
-            fileRecord ? "text-green-600" : "text-red-600"
+            session ? "text-green-600" : "text-red-600"
           }`}
         >
           {message}
