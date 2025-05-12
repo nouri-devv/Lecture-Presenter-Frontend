@@ -18,7 +18,7 @@ export function Control({
         disabled={currentSlide <= 1}
         className="rounded bg-gray-700 px-6 py-2 text-white transition-colors hover:bg-gray-600 disabled:cursor-not-allowed disabled:bg-gray-800"
       >
-        Previous
+        Prev
       </button>
       <span className="text-lg text-white">
         {currentSlide} / {totalSlides}
