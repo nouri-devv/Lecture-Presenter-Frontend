@@ -75,8 +75,18 @@ export default function LoginPage() {
             className="w-full py-2 px-4 rounded bg-blue-600 text-white hover:bg-blue-700"
           >
             Login
-          </button>{" "}
+          </button>
         </form>
+        <p className="mt-4 text-center text-sm">
+          {" "}
+          Need to sign up?{" "}
+          <button
+            onClick={() => router.push("/user/signUp")}
+            className="text-blue-600 hover:underline"
+          >
+            Sign Up
+          </button>
+        </p>
       </div>
     </div>
   );

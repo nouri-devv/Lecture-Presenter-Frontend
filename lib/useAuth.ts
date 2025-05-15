@@ -9,7 +9,7 @@ export function useAuth() {
   useEffect(() => {
     const token = sessionStorage.getItem("token");
     if (!token) {
-      router.replace("/login");
+      router.replace("/user/login");
     }
   }, []);
 }
