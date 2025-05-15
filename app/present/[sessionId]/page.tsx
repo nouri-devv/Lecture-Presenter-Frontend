@@ -13,7 +13,11 @@ export async function fetchSlide(
   slideNumber: number
 ): Promise<Blob | null> {
   const response = await fetch(
-    `${API_BASE_URL}/api/slides/${sessionId}/slide/${slideNumber}`
+    `${API_BASE_URL}/api/slides/${sessionId}/slide/${slideNumber}`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
   );
 
   if (!response.ok) {
@@ -28,7 +32,11 @@ export async function fetchAudio(
   audioNumber: number
 ): Promise<Blob | null> {
   const response = await fetch(
-    `${API_BASE_URL}/api/audios/${sessionId}/audio/${audioNumber}`
+    `${API_BASE_URL}/api/audios/${sessionId}/audio/${audioNumber}`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
   );
   if (!response.ok) {
     throw new Error(`Failed to load audio: ${response.statusText}`);

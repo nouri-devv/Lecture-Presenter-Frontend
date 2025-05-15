@@ -32,7 +32,6 @@ export default function UploadPage() {
       });
 
       const data = await response.json();
-      console.log("Response data:", data);
 
       if (response.ok) {
         setMessage(data.message);
